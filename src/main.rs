@@ -1,37 +1,36 @@
-// Unlike C/C++, there's no restriction on the order of function definitions
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use std::time::Duration;
+
 fn main() {
-    // We can use this function here, and define it somewhere later
-    fizzbuzz_to(100);
-}
+    let sdl_context = sdl2::init().unwrap();
+    let video_subsystem = sdl_context.video().unwrap();
 
-// Function that returns a boolean value
-fn is_divisible_by(lhs: u32, rhs: u32) -> bool {
-    // Corner case, early return
-    if rhs == 0 {
-        return false;
-    }
+    let window = video_subsystem
+        .window("SDL", 640, 480)
+        .position_centered()
+        .build()
+        .unwrap();
 
-    // This is an expression, the `return` keyword is not necessary here
-    lhs % rhs == 0
-}
+    let mut canvas = window.into_canvas().build().unwrap();
+    canvas.set_draw_color(Color::RGB(255, 255, 255));
+    canvas.clear();
+    canvas.present();
 
-// Functions that "don't" return a value, actually return the unit type `()`
-fn fizzbuzz(n: u32) -> () {
-    if is_divisible_by(n, 15) {
-        println!("fizzbuzz");
-    } else if is_divisible_by(n, 3) {
-        println!("fizz");
-    } else if is_divisible_by(n, 5) {
-        println!("buzz");
-    } else {
-        println!("{}", n);
-    }
-}
-
-// When a function returns `()`, the return type can be omitted from the
-// signature
-fn fizzbuzz_to(n: u32) {
-    for n in 1..=n {
-        fizzbuzz(n);
+    let mut event_pump = sdl_context.event_pump().unwrap();
+    'running: loop {
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
+                _ => {}
+            }
+        }
+        canvas.present();
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
